@@ -32,7 +32,6 @@ namespace EFSample.Controllers {
             Debugger.Break();
 
             return View("GetAll", list);
-            //return View("Index");
         }
 
         public IActionResult GetAProduct() {
@@ -41,15 +40,15 @@ namespace EFSample.Controllers {
 
             List<SqlParameter> parms = new List<SqlParameter>
             {
-        // Create parameters
-        new SqlParameter { ParameterName = "@ProductID", Value = 706}
-      };
+                // Create parameters
+                new SqlParameter { ParameterName = "@ProductID", Value = 706}
+            };
 
             list = _db.Products.FromSqlRaw<Product>(sql, parms.ToArray()).ToList();
 
             Debugger.Break();
 
-            return View("Index");
+            return View("GetAProduct", list);
         }
 
         public IActionResult CountAll() {
@@ -60,7 +59,7 @@ namespace EFSample.Controllers {
 
             Debugger.Break();
 
-            return View("Index");
+            return View("CountAll", value);
         }
 
         public IActionResult UpdateListPrice() {
@@ -69,16 +68,16 @@ namespace EFSample.Controllers {
 
             List<SqlParameter> parms = new List<SqlParameter>
             {
-        // Create parameters
-        new SqlParameter { ParameterName = "@ProductID", Value = 706},
-        new SqlParameter { ParameterName = "@ListPrice", Value = 1500}
-      };
+                // Create parameters
+                new SqlParameter { ParameterName = "@ProductID", Value = 706},
+                new SqlParameter { ParameterName = "@ListPrice", Value = 1500}
+            };
 
             rowsAffected = _db.Database.ExecuteSqlRaw(sql, parms.ToArray());
 
             Debugger.Break();
 
-            return View("Index");
+            return View("UpdateListPrice", rowsAffected);
         }
 
         public IActionResult MultipleResultSets() {
@@ -95,9 +94,9 @@ namespace EFSample.Controllers {
             _db.Database.OpenConnection();
             // Create a DataReader
             rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-            // Build collection of Black products
+            // Build collection from the first query of the stored procedure
             while (rdr.Read()) {
-                black.Add(new Product {
+                red.Add(new Product {
                     ProductID = rdr.GetInt32(0),
                     Name = rdr.GetString(1),
                     ProductNumber = rdr.GetString(2)
@@ -107,9 +106,9 @@ namespace EFSample.Controllers {
             // Advance to the next result set
             rdr.NextResult();
 
-            // Build collection of Red products
+            // Build collection from the secon query of the stored procedure
             while (rdr.Read()) {
-                red.Add(new Product {
+                black.Add(new Product {
                     ProductID = rdr.GetInt32(0),
                     Name = rdr.GetString(1),
                     ProductNumber = rdr.GetString(2)
@@ -118,10 +117,14 @@ namespace EFSample.Controllers {
 
             Debugger.Break();
 
+            //combine the data of the two queries 
+            IEnumerable<Product> blackAndRedProducts =
+               black.Concat(red);
+
             // Close Reader and Database Connection
             rdr.Close();
 
-            return View("Index");
+            return View("MultipleResultSets", blackAndRedProducts);
         }
 
         public IActionResult Privacy() {
