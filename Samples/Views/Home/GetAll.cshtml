@@ -1,0 +1,8 @@
+﻿@model IEnumerable<EFSample.Models.Product>
+<div>
+    <ul>
+        @foreach (var n in Model) {
+            <li>@n.Name</li>
+        }
+    </ul>
+</div>
